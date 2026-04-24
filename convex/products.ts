@@ -2,7 +2,6 @@ import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
 export const list = query({
   args: {},
-  returns: v.array(v.object({ _id: v.id('products'), _creationTime: v.number(), title: v.string(), description: v.string(), price: v.number(), videoUrl: v.string(), posterUrl: v.string(), variants: v.object({ sizes: v.array(v.string()), colors: v.array(v.string()) }), likesCount: v.string(), savesCount: v.string(), sharesCount: v.string(), commentsCount: v.string() })),
   handler: async (ctx) => {
     const products = await ctx.db.query("products").collect();
     return await Promise.all(
@@ -28,7 +27,6 @@ export const list = query({
 });
 export const seed = mutation({
   args: {},
-  returns: v.null(),
   handler: async (ctx) => {
     const existing = await ctx.db.query("products").first();
     if (existing) return;

@@ -3,7 +3,6 @@ import { v } from "convex/values";
 import { getAuthUserId } from "@convex-dev/auth/server";
 export const toggleLike = mutation({
   args: { productId: v.id("products") },
-  returns: v.boolean(),
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
     if (!userId) throw new Error("Authentication required");
@@ -22,7 +21,6 @@ export const toggleLike = mutation({
 });
 export const toggleSave = mutation({
   args: { productId: v.id("products") },
-  returns: v.boolean(),
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
     if (!userId) throw new Error("Authentication required");
@@ -41,7 +39,6 @@ export const toggleSave = mutation({
 });
 export const getUserInteractions = query({
   args: {},
-  returns: v.object({ likedIds: v.array(v.id("products")), savedIds: v.array(v.id("products")) }),
   handler: async (ctx) => {
     const userId = await getAuthUserId(ctx);
     if (!userId) return { likedIds: [], savedIds: [] };

@@ -1,23 +1,29 @@
-import React, { useRef, useEffect, useState, useCallback } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { useIntersection } from 'react-use';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Product } from '@/lib/mockData';
+import { useMutation } from 'convex/react';
+import { api } from '@convex/_generated/api';
 import { ProductOverlay } from './ProductOverlay';
 import { EngagementSidebar } from './EngagementSidebar';
 import { CheckoutDrawer } from './CheckoutDrawer';
-import { Volume2, VolumeX, Heart } from 'lucide-react';
+import { Volume2, VolumeX, Heart, Play } from 'lucide-react';
 interface VideoPostProps {
-  product: Product;
+  product: any;
+  isLiked: boolean;
+  isSaved: boolean;
+  onAuthRequired: () => void;
+  globalAudio: boolean;
+  onToggleAudio: () => void;
 }
-export function VideoPost({ product }: VideoPostProps) {
+export function VideoPost({ product, isLiked, isSaved, onAuthRequired, globalAudio, onToggleAudio }: VideoPostProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const [isMuted, setIsMuted] = useState(true);
-  const [isLiked, setIsLiked] = useState(false);
-  const [isSaved, setIsSaved] = useState(false);
   const [showCheckout, setShowCheckout] = useState(false);
   const [showHeartPop, setShowHeartPop] = useState(false);
+  const [needsInteraction, setNeedsInteraction] = useState(false);
   const lastTap = useRef<number>(0);
+  const toggleLikeMutation = useMutation(api.interactions.toggleLike);
+  const toggleSaveMutation = useMutation(api.interactions.toggleSave);
   const intersection = useIntersection(containerRef, {
     root: null,
     rootMargin: '0px',
@@ -26,31 +32,45 @@ export function VideoPost({ product }: VideoPostProps) {
   useEffect(() => {
     if (!videoRef.current) return;
     if (intersection && intersection.isIntersecting && !showCheckout) {
-      videoRef.current.play().catch(err => console.warn("Autoplay blocked:", err));
+      videoRef.current.play().catch((err) => {
+        console.warn("[LUMISHOP] Autoplay blocked:", err);
+        setNeedsInteraction(true);
+      });
     } else {
       videoRef.current.pause();
     }
   }, [intersection, showCheckout]);
-  const toggleMute = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    setIsMuted(!isMuted);
+  const handleManualPlay = () => {
+    if (videoRef.current) {
+      videoRef.current.play();
+      setNeedsInteraction(false);
+    }
   };
   const handleDoubleTap = (e: React.MouseEvent) => {
     const now = Date.now();
-    const DOUBLE_TAP_DELAY = 300;
-    if (now - lastTap.current < DOUBLE_TAP_DELAY) {
-      setIsLiked(true);
+    if (now - lastTap.current < 300) {
+      handleLike();
       setShowHeartPop(true);
       setTimeout(() => setShowHeartPop(false), 800);
     }
     lastTap.current = now;
   };
+  const handleLike = async () => {
+    try {
+      await toggleLikeMutation({ productId: product._id });
+    } catch (e) {
+      onAuthRequired();
+    }
+  };
+  const handleSave = async () => {
+    try {
+      await toggleSaveMutation({ productId: product._id });
+    } catch (e) {
+      onAuthRequired();
+    }
+  };
   return (
-    <div
-      ref={containerRef}
-      onClick={handleDoubleTap}
-      className="relative h-[100dvh] w-full snap-center bg-black overflow-hidden flex flex-col justify-end select-none"
-    >
+    <div ref={containerRef} onClick={handleDoubleTap} className="relative h-[100dvh] w-full snap-center bg-black overflow-hidden flex flex-col justify-end select-none">
       <video
         ref={videoRef}
         src={product.videoUrl}
@@ -58,9 +78,23 @@ export function VideoPost({ product }: VideoPostProps) {
         className="absolute inset-0 w-full h-full object-cover"
         loop
         playsInline
-        muted={isMuted}
+        muted={!globalAudio}
       />
-      {/* Heart Pop Animation */}
+      <AnimatePresence>
+        {needsInteraction && intersection?.isIntersecting && (
+          <motion.button
+            initial={{ opacity: 0, scale: 0.5 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={handleManualPlay}
+            className="absolute inset-0 flex items-center justify-center z-40 bg-black/20"
+          >
+            <div className="p-6 bg-rose-600 rounded-full shadow-2xl">
+              <Play className="w-12 h-12 text-white fill-white" />
+            </div>
+          </motion.button>
+        )}
+      </AnimatePresence>
       <AnimatePresence>
         {showHeartPop && (
           <motion.div
@@ -73,18 +107,12 @@ export function VideoPost({ product }: VideoPostProps) {
           </motion.div>
         )}
       </AnimatePresence>
-      {/* Dark gradient overlay for UI readability */}
       <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent pointer-events-none" />
-      {/* Top Controls */}
       <div className="absolute top-6 right-4 z-20">
-        <button
-          onClick={toggleMute}
-          className="p-2 bg-black/20 backdrop-blur-md rounded-full text-white hover:bg-black/40 transition-colors"
-        >
-          {isMuted ? <VolumeX className="w-6 h-6" /> : <Volume2 className="w-6 h-6" />}
+        <button onClick={(e) => { e.stopPropagation(); onToggleAudio(); }} className="p-2 bg-black/20 backdrop-blur-md rounded-full text-white hover:bg-black/40 transition-colors">
+          {globalAudio ? <Volume2 className="w-6 h-6" /> : <VolumeX className="w-6 h-6" />}
         </button>
       </div>
-      {/* Main UI Components */}
       <div className="relative z-10 flex items-end justify-between p-2 pb-8 w-full max-w-full">
         <div className="flex-1 min-w-0">
           <ProductOverlay
@@ -95,20 +123,16 @@ export function VideoPost({ product }: VideoPostProps) {
           />
         </div>
         <EngagementSidebar
-          likes={product.likes}
-          comments={product.comments}
-          shares={product.shares}
+          likes={product.likesCount}
+          comments={product.commentsCount}
+          shares={product.sharesCount}
           isLiked={isLiked}
           isSaved={isSaved}
-          onLike={() => setIsLiked(!isLiked)}
-          onSave={() => setIsSaved(!isSaved)}
+          onLike={handleLike}
+          onSave={handleSave}
         />
       </div>
-      <CheckoutDrawer 
-        product={product} 
-        isOpen={showCheckout} 
-        onClose={() => setShowCheckout(false)} 
-      />
+      <CheckoutDrawer product={product} isOpen={showCheckout} onClose={() => setShowCheckout(false)} />
     </div>
   );
 }
