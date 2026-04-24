@@ -15,12 +15,8 @@ export function HomePage() {
   const { isAuthenticated, isLoading: authLoading } = useConvexAuth();
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [audioEnabled, setAudioEnabled] = useState(false);
-  useEffect(() => {
-    if (products === null) {
-      seed();
-    }
-  }, [products, seed]);
-  if (!products || authLoading) {
+  useEffect(() => { seed(); }, [seed]);
+  if (authLoading || products === undefined) {
     return (
       <div className="h-[100dvh] w-full flex items-center justify-center bg-black">
         <Loader2 className="w-8 h-8 text-rose-600 animate-spin" />
@@ -43,8 +39,8 @@ export function HomePage() {
             <VideoPost 
               key={product._id} 
               product={product} 
-              isLiked={interactions?.likedIds.includes(product._id) ?? false}
-              isSaved={interactions?.savedIds.includes(product._id) ?? false}
+              isLiked={(interactions?.likedIds ?? []).includes(product._id)}
+              isSaved={(interactions?.savedIds ?? []).includes(product._id)}
               onAuthRequired={() => setShowAuthModal(true)}
               globalAudio={audioEnabled}
               onToggleAudio={() => setAudioEnabled(!audioEnabled)}

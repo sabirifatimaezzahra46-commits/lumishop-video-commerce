@@ -8,6 +8,7 @@ export const placeOrder = mutation({
     color: v.string(),
     total: v.number(),
   },
+  returns: v.id("orders"),
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
     if (!userId) throw new Error("Authentication required");
