@@ -6,10 +6,11 @@ interface ProductOverlayProps {
   title: string;
   price: number;
   description: string;
+  onShopNow: () => void;
 }
-export function ProductOverlay({ title, price, description }: ProductOverlayProps) {
+export function ProductOverlay({ title, price, description, onShopNow }: ProductOverlayProps) {
   return (
-    <motion.div 
+    <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay: 0.2 }}
@@ -26,12 +27,18 @@ export function ProductOverlay({ title, price, description }: ProductOverlayProp
           ${price.toFixed(2)}
         </span>
       </div>
-      <Button 
-        className="w-full bg-brand-rose hover:bg-rose-700 text-white font-bold h-14 rounded-xl text-lg shadow-xl active:scale-95 transition-transform flex items-center justify-center gap-2"
+      <motion.div
+        animate={{ scale: [1, 1.02, 1] }}
+        transition={{ repeat: Infinity, duration: 2 }}
       >
-        <ShoppingBag className="w-5 h-5" />
-        تسوق الآن
-      </Button>
+        <Button
+          onClick={onShopNow}
+          className="w-full bg-rose-600 hover:bg-rose-700 text-white font-bold h-14 rounded-xl text-lg shadow-xl shadow-rose-900/40 active:scale-95 transition-transform flex items-center justify-center gap-2"
+        >
+          <ShoppingBag className="w-5 h-5" />
+          تسوق الآن
+        </Button>
+      </motion.div>
     </motion.div>
   );
 }

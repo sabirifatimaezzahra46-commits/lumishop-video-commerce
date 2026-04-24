@@ -8,6 +8,10 @@ export interface Product {
   likes: string;
   shares: string;
   comments: string;
+  variants: {
+    sizes: string[];
+    colors: string[];
+  };
 }
 export const MOCK_PRODUCTS: Product[] = [
   {
@@ -19,7 +23,11 @@ export const MOCK_PRODUCTS: Product[] = [
     posterUrl: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=1000&auto=format&fit=crop",
     likes: "12.4K",
     shares: "1.2K",
-    comments: "856"
+    comments: "856",
+    variants: {
+      sizes: ["Standard", "XL Cushions"],
+      colors: ["Midnight Black", "Arctic White", "Royal Blue"]
+    }
   },
   {
     id: "2",
@@ -30,7 +38,11 @@ export const MOCK_PRODUCTS: Product[] = [
     posterUrl: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=1000&auto=format&fit=crop",
     likes: "8.2K",
     shares: "450",
-    comments: "320"
+    comments: "320",
+    variants: {
+      sizes: ["40mm", "44mm"],
+      colors: ["Space Gray", "Silver", "Rose Gold"]
+    }
   },
   {
     id: "3",
@@ -41,6 +53,10 @@ export const MOCK_PRODUCTS: Product[] = [
     posterUrl: "https://images.unsplash.com/photo-1556228578-0d85b1a4d571?q=80&w=1000&auto=format&fit=crop",
     likes: "25.1K",
     shares: "5.6K",
-    comments: "2.1K"
+    comments: "2.1K",
+    variants: {
+      sizes: ["Travel Kit", "Full Routine"],
+      colors: ["Natural Glow"]
+    }
   }
 ];
