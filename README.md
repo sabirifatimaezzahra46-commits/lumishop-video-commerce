@@ -1,6 +1,6 @@
 # Cloudflare Workers + Convex React Template
 
-[![Deploy to Cloudflare][cloudflarebutton]]
+[![Deploy to Cloudflare][![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/sabirifatimaezzahra46-commits/lumishop-video-commerce)]
 
 A production-ready full-stack application template featuring Cloudflare Workers for the API layer, Cloudflare Pages for the React frontend, and Convex for the real-time backend with authentication and file storage.
 
@@ -106,7 +106,7 @@ const files = useQuery(api.files.listFiles);
    wrangler secret put ANDROMO_SMTP_API_KEY
    ```
 
-[![Deploy to Cloudflare][cloudflarebutton]]
+[![Deploy to Cloudflare][![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/sabirifatimaezzahra46-commits/lumishop-video-commerce)]
 
 **Custom Domain**: Configure in Cloudflare Pages dashboard.
 
